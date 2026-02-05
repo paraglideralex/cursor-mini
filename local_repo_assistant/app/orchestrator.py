@@ -131,7 +131,7 @@ class Orchestrator:
     def cmd_index(self) -> str:
         """Выполнение индексации."""
         stats = self.indexer.index()
-        return f"\n✓ Индексация завершена\n  Файлов: {stats['total_files']}\n  Чанков: {stats['total_indexed_chunks']}"
+        return ""  # Статистика уже выведена в indexer
     
     def cmd_ask(self, query: str) -> str:
         """
@@ -143,20 +143,28 @@ class Orchestrator:
         Returns:
             Ответ ассистента
         """
+        import time
+        from tqdm import tqdm
+        
         if not query.strip():
             return "\nОшибка: вопрос не может быть пустым"
+        
+        # Общий таймер
+        total_start = time.time()
         
         # Инициализация LLM
         self._ensure_llm()
         
         # Поиск релевантных чанков
         print("\n[ASK] Поиск релевантных фрагментов...")
+        retrieval_start = time.time()
         results = self.retriever.retrieve(query)
+        retrieval_time = time.time() - retrieval_start
         
         if not results:
             return "\nНе найдено релевантных фрагментов кода для ответа на вопрос."
         
-        print(f"[ASK] Найдено фрагментов: {len(results)}")
+        print(f"[ASK] Найдено фрагментов: {len(results)} (за {retrieval_time:.2f} сек)")
         
         # Сохранение источников
         self.citation_manager.set_sources(results)
@@ -165,15 +173,40 @@ class Orchestrator:
         context = self.context_builder.build_context(results)
         prompt = self.context_builder.build_prompt(query, context)
         
-        print("[ASK] Генерация ответа...")
+        # Генерация ответа с прогресс-баром
+        print("\n[ASK] Генерация ответа...")
+        generation_start = time.time()
         
-        # Генерация ответа
-        answer = self.llm_client.generate(
-            prompt=prompt,
-            max_new_tokens=self.config.llm_max_new_tokens,
-            temperature=self.config.llm_temperature,
-            seed=self.config.llm_seed
-        )
+        # Прогресс-бар для генерации
+        with tqdm(
+            total=self.config.llm_max_new_tokens,
+            desc="Генерация",
+            unit=" токен",
+            bar_format="{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}]",
+            colour="green"
+        ) as pbar:
+            # Callback для обновления прогресс-бара
+            def update_progress(tokens: int):
+                pbar.update(tokens)
+            
+            answer = self.llm_client.generate(
+                prompt=prompt,
+                max_new_tokens=self.config.llm_max_new_tokens,
+                temperature=self.config.llm_temperature,
+                seed=self.config.llm_seed,
+                progress_callback=update_progress
+            )
+            
+            # Завершаем прогресс-бар
+            pbar.n = pbar.total
+            pbar.refresh()
+        
+        generation_time = time.time() - generation_start
+        total_time = time.time() - total_start
+        
+        # Статистика времени
+        print(f"\n⏱️  Время генерации: {generation_time:.1f} сек ({generation_time/60:.1f} мин)")
+        print(f"⏱️  Общее время: {total_time:.1f} сек ({total_time/60:.1f} мин)")
         
         # Добавление источников
         sources_section = self.citation_manager.format_sources_section(results)

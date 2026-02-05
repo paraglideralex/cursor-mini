@@ -48,7 +48,11 @@ class IncrementalIndexer:
         Returns:
             Статистика индексации
         """
+        import time
+        from tqdm import tqdm
+        
         print("\n[INDEX] Начало индексации...")
+        index_start = time.time()
         
         # Сканирование файлов
         print("[INDEX] Сканирование файлов...")
@@ -75,23 +79,33 @@ class IncrementalIndexer:
         print(f"[INDEX] Файлов для удаления: {len(files_to_delete)}")
         
         # Удаление старых чанков
-        for file_path in files_to_delete:
-            self._delete_file_chunks(file_path)
+        if files_to_delete:
+            for file_path in tqdm(files_to_delete, desc="Удаление", unit=" файл"):
+                self._delete_file_chunks(file_path)
         
-        # Обработка файлов
+        # Обработка файлов с прогресс-баром
         total_chunks = 0
-        for i, file_path in enumerate(files_to_process, 1):
-            if i % 10 == 0 or i == len(files_to_process):
-                print(f"[INDEX] Обработка файла {i}/{len(files_to_process)}: {file_path}")
-            
-            try:
-                chunks_count = self._process_file(file_path)
-                total_chunks += chunks_count
-            except Exception as e:
-                print(f"[INDEX] Ошибка при обработке {file_path}: {e}")
+        if files_to_process:
+            with tqdm(
+                total=len(files_to_process),
+                desc="Индексация",
+                unit=" файл",
+                colour="blue"
+            ) as pbar:
+                for file_path in files_to_process:
+                    try:
+                        chunks_count = self._process_file(file_path)
+                        total_chunks += chunks_count
+                        pbar.set_postfix_str(f"{file_path[:40]}...")
+                        pbar.update(1)
+                    except Exception as e:
+                        print(f"\n[INDEX] Ошибка при обработке {file_path}: {e}")
+                        pbar.update(1)
         
         # Обновление времени индексации
         self.meta_store.update_index_time()
+        
+        index_time = time.time() - index_start
         
         stats = {
             "files_processed": len(files_to_process),
@@ -101,11 +115,12 @@ class IncrementalIndexer:
             "total_indexed_chunks": self.doc_store.count()
         }
         
-        print(f"[INDEX] Индексация завершена!")
-        print(f"[INDEX] Обработано файлов: {stats['files_processed']}")
-        print(f"[INDEX] Удалено файлов: {stats['files_deleted']}")
-        print(f"[INDEX] Создано чанков: {stats['total_chunks']}")
-        print(f"[INDEX] Всего чанков в индексе: {stats['total_indexed_chunks']}")
+        print(f"\n✓ Индексация завершена!")
+        print(f"  Обработано файлов: {stats['files_processed']}")
+        print(f"  Удалено файлов: {stats['files_deleted']}")
+        print(f"  Создано чанков: {stats['total_chunks']}")
+        print(f"  Всего чанков в индексе: {stats['total_indexed_chunks']}")
+        print(f"  ⏱️  Время: {index_time:.1f} сек ({index_time/60:.1f} мин)")
         
         return stats
     

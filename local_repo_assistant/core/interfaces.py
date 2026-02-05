@@ -38,9 +38,22 @@ class LLMClient(ABC):
         prompt: str,
         max_new_tokens: int,
         temperature: float,
-        seed: int
+        seed: int,
+        progress_callback: Optional[callable] = None
     ) -> str:
-        """Генерация текста по промпту."""
+        """
+        Генерация текста по промпту.
+        
+        Args:
+            prompt: Промпт для генерации
+            max_new_tokens: Максимальное количество новых токенов
+            temperature: Температура генерации
+            seed: Seed для воспроизводимости
+            progress_callback: Опциональный callback для обновления прогресса
+        
+        Returns:
+            Сгенерированный текст
+        """
         pass
 
 

@@ -46,7 +46,8 @@ class LocalLlamaCppClient(LLMClient):
         prompt: str,
         max_new_tokens: int,
         temperature: float,
-        seed: int
+        seed: int,
+        progress_callback: callable = None
     ) -> str:
         """
         Генерация текста по промпту.
@@ -56,21 +57,37 @@ class LocalLlamaCppClient(LLMClient):
             max_new_tokens: Максимальное количество новых токенов
             temperature: Температура генерации
             seed: Seed для воспроизводимости
+            progress_callback: Callback для обновления прогресса (принимает количество токенов)
         
         Returns:
             Сгенерированный текст
         """
         try:
-            response = self.model(
+            # Генерация с потоковым выводом для обновления прогресс-бара
+            generated_tokens = []
+            token_count = 0
+            
+            for output in self.model(
                 prompt,
                 max_tokens=max_new_tokens,
                 temperature=temperature,
                 seed=seed,
                 echo=False,
-                stop=["</s>", "<|endoftext|>", "<|im_end|>"]
-            )
+                stop=["</s>", "<|endoftext|>", "<|im_end|>"],
+                stream=True
+            ):
+                token = output["choices"][0]["text"]
+                generated_tokens.append(token)
+                token_count += 1
+                
+                # Обновление прогресса каждые 5 токенов
+                if progress_callback and token_count % 5 == 0:
+                    try:
+                        progress_callback(5)
+                    except:
+                        pass
             
-            generated_text = response["choices"][0]["text"]
+            generated_text = "".join(generated_tokens)
             return generated_text.strip()
             
         except Exception as e:
@@ -98,7 +115,8 @@ class StubCorporateClient(LLMClient):
         prompt: str,
         max_new_tokens: int,
         temperature: float,
-        seed: int
+        seed: int,
+        progress_callback: callable = None
     ) -> str:
         """Заглушка для генерации."""
         return (
