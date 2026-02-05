@@ -36,6 +36,10 @@ class Config:
     llm_temperature: float
     llm_seed: int
     
+    # GPU параметры
+    use_gpu: bool
+    gpu_layers: int
+    
     @staticmethod
     def load(config_path: str = ".assistant/config.json") -> "Config":
         """Загрузка конфигурации из JSON файла."""
@@ -57,6 +61,10 @@ class Config:
             "llm_ctx_size", "llm_max_new_tokens", "llm_temperature", "llm_seed"
         ]
         
+        # GPU параметры опциональные
+        use_gpu = data.get("use_gpu", False)
+        gpu_layers = data.get("gpu_layers", 0)
+        
         missing = [field for field in required_fields if field not in data]
         if missing:
             raise ValueError(f"В конфигурации отсутствуют обязательные поля: {missing}")
@@ -77,7 +85,9 @@ class Config:
             llm_ctx_size=data["llm_ctx_size"],
             llm_max_new_tokens=data["llm_max_new_tokens"],
             llm_temperature=data["llm_temperature"],
-            llm_seed=data["llm_seed"]
+            llm_seed=data["llm_seed"],
+            use_gpu=use_gpu,
+            gpu_layers=gpu_layers
         )
         
         # Валидация путей

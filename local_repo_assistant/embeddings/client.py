@@ -13,12 +13,13 @@ class LocalSentenceTransformerClient(EmbeddingClient):
     Работает строго в offline режиме с локальными моделями.
     """
     
-    def __init__(self, model_dir: str):
+    def __init__(self, model_dir: str, use_gpu: bool = False):
         """
         Инициализация клиента.
         
         Args:
             model_dir: Путь к директории с локальной моделью embeddings
+            use_gpu: Использовать ли GPU для embeddings
         """
         try:
             from sentence_transformers import SentenceTransformer
@@ -30,10 +31,28 @@ class LocalSentenceTransformerClient(EmbeddingClient):
         
         print(f"[EMBEDDINGS] Загрузка модели из {model_dir}...")
         
+        # Определение устройства с проверкой доступности CUDA
+        if use_gpu:
+            try:
+                import torch
+                if torch.cuda.is_available():
+                    device = "cuda"
+                    print(f"[EMBEDDINGS] Устройство: cuda (GPU)")
+                else:
+                    device = "cpu"
+                    print(f"[EMBEDDINGS] ⚠️  GPU запрошен, но CUDA недоступна. Используется CPU.")
+                    print(f"[EMBEDDINGS] Установите PyTorch с CUDA: pip install torch --index-url https://download.pytorch.org/whl/cu121")
+            except ImportError:
+                device = "cpu"
+                print(f"[EMBEDDINGS] ⚠️  PyTorch не установлен. Используется CPU.")
+        else:
+            device = "cpu"
+            print(f"[EMBEDDINGS] Устройство: cpu")
+        
         try:
             self.model = SentenceTransformer(
                 model_dir,
-                device="cpu",  # CPU-only
+                device=device,
                 trust_remote_code=False  # Безопасность
             )
             self._dimension = self.model.get_sentence_embedding_dimension()

@@ -10,13 +10,15 @@ from core.interfaces import LLMClient
 class LocalLlamaCppClient(LLMClient):
     """LLM клиент через llama-cpp-python для локальной GGUF модели."""
     
-    def __init__(self, model_path: str, ctx_size: int):
+    def __init__(self, model_path: str, ctx_size: int, use_gpu: bool = False, gpu_layers: int = 0):
         """
         Инициализация клиента.
         
         Args:
             model_path: Путь к GGUF файлу модели
             ctx_size: Размер контекста
+            use_gpu: Использовать ли GPU
+            gpu_layers: Количество слоёв на GPU (0 = CPU-only, -1 = все слои)
         """
         try:
             from llama_cpp import Llama
@@ -29,17 +31,46 @@ class LocalLlamaCppClient(LLMClient):
         print(f"[LLM] Загрузка модели из {model_path}...")
         print(f"[LLM] Размер контекста: {ctx_size}")
         
+        # Проверка доступности GPU для llama-cpp-python
+        actual_gpu_layers = 0
+        if use_gpu and gpu_layers != 0:
+            try:
+                # llama-cpp-python попытается использовать CUDA автоматически
+                actual_gpu_layers = gpu_layers
+                print(f"[LLM] Режим: GPU (слоёв на GPU: {gpu_layers})")
+                print(f"[LLM] ⚠️  Если CUDA недоступна для llama-cpp-python, автоматически будет использован CPU")
+            except:
+                actual_gpu_layers = 0
+                print(f"[LLM] Режим: CPU-only (fallback)")
+        else:
+            print(f"[LLM] Режим: CPU-only")
+        
         try:
             self.model = Llama(
                 model_path=model_path,
                 n_ctx=ctx_size,
-                n_threads=8,  # Оптимально для i7-13700H
-                n_gpu_layers=0,  # CPU-only
+                n_threads=8,  # Оптимально для многоядерного CPU
+                n_gpu_layers=actual_gpu_layers,
                 verbose=False
             )
             print("[LLM] Модель успешно загружена")
         except Exception as e:
-            raise RuntimeError(f"Ошибка загрузки модели LLM: {e}")
+            # Если ошибка связана с GPU, пробуем fallback на CPU
+            if use_gpu and "CUDA" in str(e):
+                print(f"[LLM] ⚠️  Ошибка загрузки с GPU, повтор с CPU...")
+                try:
+                    self.model = Llama(
+                        model_path=model_path,
+                        n_ctx=ctx_size,
+                        n_threads=8,
+                        n_gpu_layers=0,
+                        verbose=False
+                    )
+                    print("[LLM] Модель успешно загружена (CPU-only)")
+                except Exception as e2:
+                    raise RuntimeError(f"Ошибка загрузки модели LLM: {e2}")
+            else:
+                raise RuntimeError(f"Ошибка загрузки модели LLM: {e}")
     
     def generate(
         self,

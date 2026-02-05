@@ -34,6 +34,8 @@
    - Скачать: https://huggingface.co/intfloat/multilingual-e5-large
    - Папка со всеми файлами модели
    - Размер: ~2.2 GB
+   
+**Важно**: Модели можно скачать **вручную через браузер** или через `huggingface-cli`. Оба способа равнозначны!
 
 ## Установка
 
@@ -66,19 +68,46 @@ pip install -r requirements.txt
 Создайте структуру папок:
 
 ```
-local_repo_assistant/
+cursor-mini/  (или ваша корневая папка проекта)
   models/
-    llm/
-      qwen2.5-coder-7b-instruct-q4_k_m.gguf
     embeddings/
       multilingual-e5-large/
         config.json
         model.safetensors
         tokenizer.json
         ...
+  qwen2.5-coder-7b-instruct-q4_k_m.gguf
+  local_repo_assistant/
+    ...
 ```
 
-Скопируйте скачанные модели в соответствующие папки.
+#### Способ 1: Через huggingface-cli (требует доступ к HuggingFace)
+
+```bash
+# Из корня проекта
+pip install huggingface-hub
+
+# Скачать embeddings
+huggingface-cli download intfloat/multilingual-e5-large --local-dir models/embeddings/multilingual-e5-large --local-dir-use-symlinks False
+```
+
+#### Способ 2: Ручное скачивание (работает без доступа к HuggingFace CLI)
+
+1. Перейдите на https://huggingface.co/intfloat/multilingual-e5-large
+2. Нажмите "Files and versions"
+3. Скачайте **ВСЕ файлы** (можно по одному через браузер):
+   - `config.json`
+   - `model.safetensors` (основной файл, ~2.2 GB)
+   - `tokenizer.json`
+   - `tokenizer_config.json`
+   - `special_tokens_map.json`
+   - `sentencepiece.bpe.model`
+   - Остальные файлы (если есть)
+4. Положите все файлы в `models/embeddings/multilingual-e5-large/`
+
+**Важно**: Убедитесь что все файлы лежат в одной папке `multilingual-e5-large/`!
+
+LLM модель (`.gguf` файл) можно просто скачать и положить в корень проекта.
 
 ### 4. Создание конфигурации
 
@@ -286,6 +315,27 @@ src/Email/EmailService.cs:15: public class EmailService : IEmailService
 - **`llm_max_new_tokens`**: Максимальная длина ответа в токенах (по умолчанию: 700)
 - **`llm_temperature`**: Температура генерации, 0.0-1.0 (по умолчанию: 0.2)
 - **`llm_seed`**: Seed для воспроизводимости результатов (по умолчанию: 42)
+
+### Параметры GPU (опционально)
+
+- **`use_gpu`**: Использовать GPU (по умолчанию: false)
+- **`gpu_layers`**: Количество слоёв модели на GPU (по умолчанию: 0)
+  - `0` = CPU-only
+  - `32` = часть слоёв на GPU (быстрее)
+  - `-1` = все слои на GPU (максимальная скорость)
+
+**Для включения GPU:**
+```json
+{
+  "use_gpu": true,
+  "gpu_layers": 32
+}
+```
+
+**Требования для GPU:**
+- NVIDIA GPU с поддержкой CUDA
+- Установить `llama-cpp-python` с CUDA: `pip install llama-cpp-python --extra-index-url https://abetlen.github.io/llama-cpp-python/whl/cu121`
+- Для embeddings нужен PyTorch с CUDA: `pip install torch --index-url https://download.pytorch.org/whl/cu121`
 
 ## Безопасность и локальность
 

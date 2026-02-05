@@ -49,5 +49,8 @@
   "llm_ctx_size": 8192,
   "llm_max_new_tokens": 700,
   "llm_temperature": 0.2,
-  "llm_seed": 42
+  "llm_seed": 42,
+  
+  "use_gpu": false,
+  "gpu_layers": 0
 }

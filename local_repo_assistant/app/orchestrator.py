@@ -48,7 +48,8 @@ class Orchestrator:
         
         # Embeddings клиент
         self.embedding_client: EmbeddingClient = LocalSentenceTransformerClient(
-            config.embedding_model_dir
+            model_dir=config.embedding_model_dir,
+            use_gpu=config.use_gpu
         )
         
         # Vector store
@@ -125,7 +126,9 @@ class Orchestrator:
         if self.llm_client is None:
             self.llm_client = LocalLlamaCppClient(
                 model_path=self.config.llm_model_path,
-                ctx_size=self.config.llm_ctx_size
+                ctx_size=self.config.llm_ctx_size,
+                use_gpu=self.config.use_gpu,
+                gpu_layers=self.config.gpu_layers
             )
     
     def cmd_index(self) -> str:
