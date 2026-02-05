@@ -1,0 +1,15 @@
+# Основные зависимости для локального RAG-ассистента
+
+# LLM Runtime
+llama-cpp-python>=0.2.0
+
+# Embeddings
+sentence-transformers>=2.2.0
+transformers>=4.30.0
+torch>=2.0.0
+
+# Vector Store
+hnswlib>=0.7.0
+
+# Утилиты
+numpy>=1.24.0

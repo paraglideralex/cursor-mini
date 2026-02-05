@@ -1,0 +1,53 @@
+{
+  "repo_root": "C:/path/to/your/repository",
+  "storage_dir": ".assistant/storage",
+  
+  "llm_model_path": "models/llm/qwen2.5-coder-7b-instruct-q4_k_m.gguf",
+  "embedding_model_dir": "models/embeddings/multilingual-e5-large",
+  
+  "include_extensions": [
+    ".cs",
+    ".py",
+    ".js",
+    ".ts",
+    ".java",
+    ".cpp",
+    ".hpp",
+    ".h",
+    ".c",
+    ".go",
+    ".rs",
+    ".rb",
+    ".php",
+    ".swift",
+    ".kt",
+    ".scala"
+  ],
+  
+  "exclude_dirs": [
+    "bin",
+    "obj",
+    "node_modules",
+    ".git",
+    ".vs",
+    ".vscode",
+    "packages",
+    "dist",
+    "build",
+    "venv",
+    "__pycache__"
+  ],
+  
+  "max_file_size_kb": 500,
+  
+  "chunk_size_lines": 250,
+  "chunk_overlap_lines": 30,
+  
+  "top_k": 12,
+  "max_context_chars": 60000,
+  
+  "llm_ctx_size": 8192,
+  "llm_max_new_tokens": 700,
+  "llm_temperature": 0.2,
+  "llm_seed": 42
+}
