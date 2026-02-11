@@ -1,9 +1,7 @@
 {
-  "repo_root": "C:/path/to/your/repository",
-  "storage_dir": ".assistant/storage",
-  
   "llm_model_path": "models/llm/qwen2.5-coder-7b-instruct-q4_k_m.gguf",
   "embedding_model_dir": "models/embeddings/multilingual-e5-large",
+  "storage_root": ".codelens_storage",
   
   "include_extensions": [
     ".cs",
