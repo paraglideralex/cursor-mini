@@ -53,7 +53,9 @@ def get_orchestrator(
 ):
     """Получить или создать orchestrator для репозитория."""
     if repo.repo_id not in AppState.orchestrators:
-        from app.orchestrator import Orchestrator
+        from app.assistant_loader import load_orchestrator_class
+        
+        Orchestrator = load_orchestrator_class()
         
         legacy = config.to_legacy_config(
             repo_root=repo.path,

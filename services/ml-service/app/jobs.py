@@ -2,11 +2,27 @@
 Фоновые задачи индексации.
 """
 import logging
+import sys
 import threading
 import uuid
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
+# Настройка путей перед импортами (если еще не настроено)
+_current_file = Path(__file__).resolve()
+_ml_service_dir = _current_file.parent.parent  # services/ml-service
+_repo_root = _ml_service_dir.parent.parent  # cursor-mini
+_assistant_path = _repo_root / "local_repo_assistant"
+
+if str(_ml_service_dir) not in sys.path:
+    sys.path.insert(0, str(_ml_service_dir))
+if str(_repo_root) not in sys.path:
+    sys.path.insert(0, str(_repo_root))
+if str(_assistant_path) not in sys.path:
+    sys.path.insert(0, str(_assistant_path))
+
+# Теперь можно использовать абсолютные импорты
 from app.config import ServiceConfig
 from app.context import _ASSISTANT_PATH, _REPO_ROOT
 from app.repositories import Repository
@@ -31,12 +47,10 @@ class JobStatus:
 
 def _run_index(config: ServiceConfig, repo: Repository) -> dict[str, Any]:
     """Выполнение индексации через local_repo_assistant."""
-    import sys
-    sys.path.insert(0, str(_REPO_ROOT))
-    sys.path.insert(0, str(_ASSISTANT_PATH))
-
-    from app.orchestrator import Orchestrator
-
+    from app.assistant_loader import load_orchestrator_class
+    
+    Orchestrator = load_orchestrator_class()
+    
     legacy = config.to_legacy_config(
         repo_root=repo.path,
         storage_dir=repo.storage_dir,

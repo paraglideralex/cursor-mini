@@ -17,6 +17,7 @@ router = APIRouter(prefix="/repositories/{repo_id}/query", tags=["Query"])
 def _get_orchestrator_for_repo(repo_id: str) -> Any:
     """Получить orchestrator для репозитория (вручную, без Depends цепочки)."""
     from app.dependencies import AppState, get_config
+    from app.assistant_loader import load_orchestrator_class
     
     store = get_repo_store()
     repo = store.get(repo_id)
@@ -26,7 +27,7 @@ def _get_orchestrator_for_repo(repo_id: str) -> Any:
     config = get_config()
     
     if repo.repo_id not in AppState.orchestrators:
-        from app.orchestrator import Orchestrator
+        Orchestrator = load_orchestrator_class()
         
         legacy = config.to_legacy_config(
             repo_root=repo.path,
