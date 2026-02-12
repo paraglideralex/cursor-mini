@@ -15,6 +15,7 @@ build/
 .assistant/storage/
 .assistant/config.json
 local_repo_assistant/.assistant/
+.codelens_storage/
 models/
 *.gguf
 

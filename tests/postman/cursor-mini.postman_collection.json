@@ -1,0 +1,257 @@
+{
+	"info": {
+		"_postman_id": "0d125083-eb68-4ae6-a0d6-ad14f74655f0",
+		"name": "cursor-mini",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38192278"
+	},
+	"item": [
+		{
+			"name": "add repo",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"petProject\",\r\n    \"path\": {{repoPath}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/repositories",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"repositories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query question",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"question\": \"Есть ли в этом репозитории авторизация и как она работает тут?\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/repositories/{{repoId}}/query",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"repositories",
+						"{{repoId}}",
+						"query"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "start indexation",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/repositories/{{repoId}}/index/start",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"repositories",
+						"{{repoId}}",
+						"index",
+						"start"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get repos",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/repositories",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"repositories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "indexing job status",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/repositories/{{repoId}}/index/2272cd18-6476-4523-ab27-d21187b7a38a/status",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"repositories",
+						"{{repoId}}",
+						"index",
+						"2272cd18-6476-4523-ab27-d21187b7a38a",
+						"status"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get repo",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/repositories/08f01b03-516b-4389-a0d0-b8148f53c5e6",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"repositories",
+						"08f01b03-516b-4389-a0d0-b8148f53c5e6"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "query question SSE",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8000/repositories/{{repoId}}/query/stream?question=Через какой паттерн тут реализован CQRS?",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"repositories",
+						"{{repoId}}",
+						"query",
+						"stream"
+					],
+					"query": [
+						{
+							"key": "question",
+							"value": "Через какой паттерн тут реализован CQRS?"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8000/repositories/{{repoId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8000",
+					"path": [
+						"repositories",
+						"{{repoId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
